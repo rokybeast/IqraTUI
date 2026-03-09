@@ -31,6 +31,8 @@ pub struct Keybindings {
     pub help: String,
     #[serde(default = "default_bookmark_list")]
     pub bookmark_list: String,
+    #[serde(default = "default_cycle_theme")]
+    pub cycle_theme: String,
 }
 
 fn default_quit() -> String { "q".into() }
@@ -47,6 +49,7 @@ fn default_toggle_romanized() -> String { "r".into() }
 fn default_toggle_english() -> String { "e".into() }
 fn default_help() -> String { "?".into() }
 fn default_bookmark_list() -> String { "B".into() }
+fn default_cycle_theme() -> String { "t".into() }
 
 impl Default for Keybindings {
     fn default() -> Self {
@@ -65,6 +68,7 @@ impl Default for Keybindings {
             toggle_english: default_toggle_english(),
             help: default_help(),
             bookmark_list: default_bookmark_list(),
+            cycle_theme: default_cycle_theme(),
         }
     }
 }
