@@ -17,17 +17,6 @@ pub enum SurahStatus {
     Failed,
 }
 
-impl std::fmt::Display for SurahStatus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SurahStatus::NotDownloaded => write!(f, "🌐"),
-            SurahStatus::Downloaded => write!(f, "💾"),
-            SurahStatus::Downloading => write!(f, "⏳"),
-            SurahStatus::Failed => write!(f, "❌"),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Ayah {
     pub surah_id: u16,
