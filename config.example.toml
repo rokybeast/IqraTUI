@@ -1,0 +1,31 @@
+theme = "Dark"
+default_mode = "paginated"
+show_arabic = true
+show_romanized = true
+show_english = true
+
+[keybindings]
+quit = "q"
+next_ayah = "Right"
+prev_ayah = "Left"
+download = "d"
+delete = "x"
+bookmark = "b"
+surah_list = "s"
+tts_toggle = "Space"
+scroll_mode = "m"
+toggle_arabic = "a"
+toggle_romanized = "r"
+toggle_english = "e"
+help = "?"
+bookmark_list = "B"
+
+[tts]
+reciter_id = 7
+auto_next = false
+
+[salah]
+latitude = 21.4225
+longitude = 39.8262
+method = 2
+show_in_status = true
