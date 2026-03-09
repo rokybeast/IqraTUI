@@ -5,18 +5,20 @@ use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
 use crate::core::models::ViewMode;
+use crate::icons::Icons;
 use crate::ui::app::App;
 
 pub fn draw(frame: &mut Frame, app: &App, area: Rect) {
     let theme = &app.theme;
+    let icons = &app.config.icon_style;
 
     let mode_label = match app.view_mode {
-        ViewMode::Paginated => "PAGE",
-        ViewMode::Scroll => "SCROLL",
+        ViewMode::Paginated => format!("{} PAGE", Icons::mode_paginated(icons)),
+        ViewMode::Scroll => format!("{} SCROLL", Icons::mode_scroll(icons)),
     };
 
-    let bookmark_indicator = if let Some(_ayah) = app.current_ayah() {
-        "🔖"
+    let bookmark_indicator = if app.current_ayah().is_some() {
+        Icons::bookmark(icons)
     } else {
         ""
     };
@@ -44,11 +46,11 @@ pub fn draw(frame: &mut Frame, app: &App, area: Rect) {
             Style::default().fg(theme.highlight),
         ),
         Span::styled(
-            format!(" 💾 {}/114 ", downloaded),
+            format!(" {} {}/114 ", Icons::downloaded(icons), downloaded),
             Style::default().fg(theme.verse_number),
         ),
         Span::styled(
-            " ? help ",
+            format!(" {} help ", Icons::help(icons)),
             Style::default().fg(theme.status_bar_fg),
         ),
     ]);
