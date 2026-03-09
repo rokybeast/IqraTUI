@@ -1,6 +1,7 @@
 pub mod api;
 pub mod config;
 pub mod core;
+pub mod icons;
 pub mod salah;
 pub mod storage;
 pub mod theme;
