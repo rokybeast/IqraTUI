@@ -20,6 +20,7 @@ toggle_romanized = "r"
 toggle_english = "e"
 help = "?"
 bookmark_list = "B"
+cycle_theme = "t"
 
 [tts]
 reciter_id = 7
