@@ -7,6 +7,7 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
 use crate::core::models::ViewMode;
+use crate::icons::IconStyle;
 use crate::theme::ThemeType;
 use keybindings::Keybindings;
 
@@ -28,6 +29,8 @@ pub struct AppConfig {
     pub tts: TtsConfig,
     #[serde(default)]
     pub salah: SalahConfig,
+    #[serde(default)]
+    pub icon_style: IconStyle,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -81,6 +84,7 @@ impl Default for AppConfig {
             keybindings: Keybindings::default(),
             tts: TtsConfig::default(),
             salah: SalahConfig::default(),
+            icon_style: IconStyle::default(),
         }
     }
 }
