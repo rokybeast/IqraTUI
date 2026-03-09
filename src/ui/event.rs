@@ -6,6 +6,7 @@ use tokio::sync::Mutex;
 
 use crate::core::models::Popup;
 use crate::core::service::QuranService;
+use crate::theme::{Theme, ThemeType};
 use crate::ui::app::App;
 
 pub enum Action {
@@ -28,6 +29,7 @@ pub enum Action {
     ToggleEnglish,
     Help,
     OpenBookmarkList,
+    CycleTheme,
     Confirm,
     Escape,
     SearchChar(char),
@@ -84,6 +86,8 @@ pub fn map_key_to_action(key: KeyCode, app: &App) -> Action {
         Action::Help
     } else if kb.matches(key, &kb.bookmark_list) {
         Action::OpenBookmarkList
+    } else if kb.matches(key, &kb.cycle_theme) {
+        Action::CycleTheme
     } else {
         match key {
             KeyCode::Home => Action::FirstAyah,
@@ -232,6 +236,21 @@ pub async fn handle_action(
             } else {
                 Popup::Help
             };
+        }
+        Action::CycleTheme => {
+            let next = match app.config.theme {
+                ThemeType::Dark => ThemeType::Light,
+                ThemeType::Light => ThemeType::Terminal,
+                ThemeType::Terminal => ThemeType::Dark,
+            };
+            app.config.theme = next.clone();
+            app.theme = Theme::from_type(&next);
+            let name = match next {
+                ThemeType::Dark => "Dark",
+                ThemeType::Light => "Light",
+                ThemeType::Terminal => "Terminal",
+            };
+            app.status_message = format!("Theme: {}", name);
         }
         Action::OpenBookmarkList => {
             let svc = service.lock().await;
