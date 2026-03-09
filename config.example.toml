@@ -3,6 +3,7 @@ default_mode = "paginated"
 show_arabic = true
 show_romanized = true
 show_english = true
+icon_style = "NerdFont"
 
 [keybindings]
 quit = "q"
