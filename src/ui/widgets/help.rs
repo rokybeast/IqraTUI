@@ -33,6 +33,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         (&kb.toggle_romanized, "Toggle Romanized"),
         (&kb.toggle_english, "Toggle English"),
         (&kb.bookmark_list, "Open Bookmark List"),
+        (&kb.cycle_theme, "Cycle Theme"),
         (&kb.help, "Toggle Help"),
         (&kb.quit, "Quit"),
     ];
