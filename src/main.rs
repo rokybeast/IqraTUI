@@ -1,5 +1,6 @@
 use std::io;
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Result;
 use crossterm::event::{self, Event, KeyEventKind};
@@ -15,6 +16,7 @@ use iqra_tui::api::quran::QuranApi;
 use iqra_tui::config::AppConfig;
 use iqra_tui::core::service::QuranService;
 use iqra_tui::storage::db::Database;
+use iqra_tui::tts::TtsPlayer;
 use iqra_tui::ui::app::App;
 use iqra_tui::ui::event::{handle_action, map_key_to_action};
 use iqra_tui::ui::render;
@@ -27,7 +29,10 @@ async fn main() -> Result<()> {
     let api = QuranApi::new();
     let service = Arc::new(Mutex::new(QuranService::new(db, api)));
 
+    let reciter_id = config.tts.reciter_id;
+    let auto_next = config.tts.auto_next;
     let mut app = App::new(config);
+    let mut tts = TtsPlayer::new(reciter_id, auto_next);
 
     {
         let svc = service.lock().await;
@@ -64,14 +69,34 @@ async fn main() -> Result<()> {
             render::draw(frame, &app);
         })?;
 
-        if let Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press {
-                let action = map_key_to_action(key.code, &app);
-                handle_action(action, &mut app, &service).await?;
+        if event::poll(Duration::from_millis(100))? {
+            if let Event::Key(key) = event::read()? {
+                if key.kind == KeyEventKind::Press {
+                    let action = map_key_to_action(key.code, &app);
+                    handle_action(action, &mut app, &service, &mut tts).await?;
+                }
+            }
+        }
+
+        if tts.is_finished() && tts.state == iqra_tui::tts::TtsState::Playing {
+            if tts.auto_next {
+                app.next_ayah();
+                if let Some(ayah) = app.current_ayah() {
+                    let sid = ayah.surah_id;
+                    let anum = ayah.ayah_number;
+                    let _ = tts.play(sid, anum).await;
+                    app.status_message = format!("Playing {}:{}", sid, anum);
+                } else {
+                    tts.stop();
+                    app.status_message = String::from("Playback finished");
+                }
+            } else {
+                tts.stop();
             }
         }
     }
 
+    tts.stop();
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
     terminal.show_cursor()?;
