@@ -19,6 +19,29 @@ pub struct PrayerTimes {
     pub isha: String,
 }
 
+impl PrayerTimes {
+    pub fn get_next_prayer(&self) -> Option<(&'static str, &str)> {
+        let now = chrono::Local::now().format("%H:%M").to_string();
+        let prayers = vec![
+            ("Fajr", &self.fajr),
+            ("Sunrise", &self.sunrise),
+            ("Dhuhr", &self.dhuhr),
+            ("Asr", &self.asr),
+            ("Maghrib", &self.maghrib),
+            ("Isha", &self.isha),
+        ];
+
+        for (name, time) in &prayers {
+            if time.as_str() > now.as_str() {
+                return Some((*name, time.as_str()));
+            }
+        }
+        
+        // If all prayers today have passed, next is Fajr tomorrow
+        Some(("Fajr", &self.fajr))
+    }
+}
+
 #[derive(Debug, Deserialize)]
 struct TimingsResponse {
     data: TimingsData,

@@ -29,7 +29,7 @@ pub fn draw(frame: &mut Frame, app: &App, area: Rect) {
         .filter(|s| s.status == crate::core::models::SurahStatus::Downloaded)
         .count();
 
-    let line = Line::from(vec![
+    let mut line_spans = vec![
         Span::styled(
             format!(" {} ", mode_label),
             Style::default()
@@ -45,15 +45,30 @@ pub fn draw(frame: &mut Frame, app: &App, area: Rect) {
             format!(" {} ", bookmark_indicator),
             Style::default().fg(theme.highlight),
         ),
-        Span::styled(
-            format!(" {} {}/114 ", Icons::downloaded(icons), downloaded),
-            Style::default().fg(theme.verse_number),
-        ),
-        Span::styled(
-            format!(" {} help ", Icons::help(icons)),
-            Style::default().fg(theme.status_bar_fg),
-        ),
-    ]);
+    ];
+
+    if app.config.salah.show_in_status {
+        if let Some(ref times) = app.prayer_times {
+            if let Some((name, time)) = times.get_next_prayer() {
+                line_spans.push(Span::styled(
+                    format!(" {} {}: {} ", Icons::mosque(icons), name, time),
+                    Style::default().fg(theme.status_bar_fg),
+                ));
+            }
+        }
+    }
+
+    line_spans.push(Span::styled(
+        format!(" {} {}/114 ", Icons::downloaded(icons), downloaded),
+        Style::default().fg(theme.verse_number),
+    ));
+
+    line_spans.push(Span::styled(
+        format!(" {} help ", Icons::help(icons)),
+        Style::default().fg(theme.status_bar_fg),
+    ));
+
+    let line = Line::from(line_spans);
 
     let bar = Paragraph::new(line)
         .style(Style::default().bg(theme.status_bar_bg));

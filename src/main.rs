@@ -15,6 +15,7 @@ use tokio::sync::Mutex;
 use iqra_tui::api::quran::QuranApi;
 use iqra_tui::config::AppConfig;
 use iqra_tui::core::service::QuranService;
+use iqra_tui::salah::SalahService;
 use iqra_tui::storage::db::Database;
 use iqra_tui::tts::TtsPlayer;
 use iqra_tui::ui::app::App;
@@ -33,6 +34,25 @@ async fn main() -> Result<()> {
     let auto_next = config.tts.auto_next;
     let mut app = App::new(config);
     let mut tts = TtsPlayer::new(reciter_id, auto_next);
+    let mut salah_service = SalahService::new();
+
+    if app.config.salah.show_in_status {
+        match salah_service
+            .fetch(
+                app.config.salah.latitude,
+                app.config.salah.longitude,
+                app.config.salah.method,
+            )
+            .await
+        {
+            Ok(times) => {
+                app.prayer_times = Some(times);
+            }
+            Err(e) => {
+                app.status_message = format!("Failed to fetch prayer times: {}", e);
+            }
+        }
+    }
 
     {
         let svc = service.lock().await;

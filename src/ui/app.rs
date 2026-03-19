@@ -1,5 +1,6 @@
 use crate::config::AppConfig;
 use crate::core::models::{Ayah, Bookmark, Popup, Surah, ViewMode};
+use crate::api::salah::PrayerTimes;
 use crate::theme::Theme;
 
 pub struct App {
@@ -22,6 +23,7 @@ pub struct App {
     pub scroll_offset: u16,
     pub loading: bool,
     pub surah_search: String,
+    pub prayer_times: Option<PrayerTimes>,
 }
 
 impl App {
@@ -52,6 +54,7 @@ impl App {
             scroll_offset: 0,
             loading: false,
             surah_search: String::new(),
+            prayer_times: None,
         }
     }
 
