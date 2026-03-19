@@ -7,6 +7,7 @@ use tokio::sync::Mutex;
 use crate::core::models::Popup;
 use crate::core::service::QuranService;
 use crate::theme::{Theme, ThemeType};
+use crate::tts::{TtsPlayer, TtsState};
 use crate::ui::app::App;
 
 pub enum Action {
@@ -30,6 +31,7 @@ pub enum Action {
     Help,
     OpenBookmarkList,
     CycleTheme,
+    TtsToggle,
     Confirm,
     Escape,
     SearchChar(char),
@@ -49,6 +51,8 @@ pub fn map_key_to_action(key: KeyCode, app: &App) -> Action {
             KeyCode::Char(c) => {
                 if app.popup == Popup::SurahList {
                     Action::SearchChar(c)
+                } else if kb.matches(key, &kb.tts_toggle) {
+                    Action::TtsToggle
                 } else if kb.matches(key, &kb.quit) {
                     Action::Escape
                 } else {
@@ -88,6 +92,8 @@ pub fn map_key_to_action(key: KeyCode, app: &App) -> Action {
         Action::OpenBookmarkList
     } else if kb.matches(key, &kb.cycle_theme) {
         Action::CycleTheme
+    } else if kb.matches(key, &kb.tts_toggle) {
+        Action::TtsToggle
     } else {
         match key {
             KeyCode::Home => Action::FirstAyah,
@@ -105,6 +111,7 @@ pub async fn handle_action(
     action: Action,
     app: &mut App,
     service: &Arc<Mutex<QuranService>>,
+    tts: &mut TtsPlayer,
 ) -> Result<()> {
     match action {
         Action::Quit => {
@@ -251,6 +258,33 @@ pub async fn handle_action(
                 ThemeType::Terminal => "Terminal",
             };
             app.status_message = format!("Theme: {}", name);
+        }
+        Action::TtsToggle => {
+            match tts.state {
+                TtsState::Idle | TtsState::Loading => {
+                    if let Some(ayah) = app.current_ayah() {
+                        let sid = ayah.surah_id;
+                        let anum = ayah.ayah_number;
+                        app.status_message = format!("Loading audio {}:{}...", sid, anum);
+                        match tts.play(sid, anum).await {
+                            Ok(_) => {
+                                app.status_message = format!("Playing {}:{}", sid, anum);
+                            }
+                            Err(e) => {
+                                app.status_message = format!("TTS error: {}", e);
+                            }
+                        }
+                    }
+                }
+                TtsState::Playing => {
+                    tts.pause();
+                    app.status_message = String::from("Paused");
+                }
+                TtsState::Paused => {
+                    tts.resume();
+                    app.status_message = String::from("Resumed");
+                }
+            }
         }
         Action::OpenBookmarkList => {
             let svc = service.lock().await;
